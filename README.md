@@ -16,7 +16,7 @@ docker run -d \
 npm install & npm start
 ```
 
-3. Frontend
+3. Frontend (`/frontend`):
 
 ```bash
 http-server
