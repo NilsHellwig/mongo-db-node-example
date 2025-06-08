@@ -4,37 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <h1>Blog-Einträge</h1>
+  <body class="bg-gray-100 text-gray-800 font-sans p-8">
+    <h1 class="text-3xl font-bold mb-6">📝 Blog-Einträge</h1>
 
-    <h2>POST-Request: Neuen Blog-Eintrag posten</h2>
-    <form id="post-form">
-      <textarea id="message" placeholder="Nachricht" required></textarea><br /><br />
-      <button type="submit">Posten</button>
-    </form>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="space-y-6">
+        <section class="bg-white p-6 rounded shadow">
+          <h2 class="text-xl font-semibold mb-4">Neuen Blog-Eintrag posten</h2>
+          <form id="post-form" class="space-y-4">
+            <textarea id="message" placeholder="Nachricht" required class="w-full p-2 border rounded"></textarea>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Posten</button>
+          </form>
+        </section>
 
-    <h2>GET-Request: Blog-Einträge anzeigen</h2>
-    <div id="blog-list"></div>
+        <section class="bg-white p-6 rounded shadow">
+          <h2 class="text-xl font-semibold mb-4">Eintrag löschen</h2>
+          <form id="delete-form" class="space-y-4">
+            <input type="text" id="delete-id" placeholder="ID des Eintrags" required class="w-full p-2 border rounded" />
+            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Löschen</button>
+          </form>
+        </section>
 
-    <h2>DELETE-Request: Blog-Eintrag löschen</h2>
-    <form id="delete-form">
-      <input type="text" id="delete-id" placeholder="ID des zu löschenden Eintrags" required /><br /><br />
-      <button type="submit">Löschen</button>
-    </form>
+        <section class="bg-white p-6 rounded shadow">
+          <h2 class="text-xl font-semibold mb-4">Eintrag aktualisieren</h2>
+          <form id="update-form" class="space-y-4">
+            <input type="text" id="update-id" placeholder="ID" required class="w-full p-2 border rounded" />
+            <textarea id="update-message" placeholder="Neue Nachricht" required class="w-full p-2 border rounded"></textarea>
+            <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Aktualisieren</button>
+          </form>
+        </section>
+      </div>
 
-    <h2>UPDATE-Request: Blog-Eintrag aktualisieren</h2>
-    <form id="update-form">
-      <input type="text" id="update-id" placeholder="ID" required /><br /><br />
-      <textarea id="update-message" placeholder="Neue Nachricht" required></textarea><br /><br />
-      <button type="submit">Aktualisieren</button>
-    </form>
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">Alle Blog-Einträge</h2>
+        <div id="blog-list" class="space-y-4"></div>
+      </div>
+    </div>
 
     <script>
       const apiUrl = "http://localhost:3000/blogs";
 
-      // Funktion zum Laden und Anzeigen der Blogeinträge
-      // Funktion zum Laden und Anzeigen der Blogeinträge
       function loadBlogs() {
         fetch(apiUrl)
           .then((response) => response.json())
@@ -43,14 +54,24 @@
             blogList.innerHTML = "";
             blogs.forEach((blog) => {
               const blogElement = document.createElement("div");
-              blogElement.className = "blog-entry";
-              blogElement.innerHTML = `<strong>ID:</strong> ${blog._id} <br> <strong>Message:</strong> ${blog.message}`;
+              blogElement.className = "p-4 border rounded bg-gray-50";
+              blogElement.innerHTML = `<strong>ID:</strong> ${blog._id}<br><strong>Message:</strong> ${blog.message}`;
               blogList.appendChild(blogElement);
             });
           });
       }
 
-      // Blog-Eintrag posten
+      function renderBlogs(blogs) {
+        const blogList = document.getElementById("blog-list");
+        blogList.innerHTML = "";
+        blogs.forEach((blog) => {
+          const blogElement = document.createElement("div");
+          blogElement.className = "p-4 border rounded bg-gray-50";
+          blogElement.innerHTML = `<strong>ID:</strong> ${blog._id}<br><strong>Message:</strong> ${blog.message}`;
+          blogList.appendChild(blogElement);
+        });
+      }
+
       document.getElementById("post-form").addEventListener("submit", function (event) {
         event.preventDefault();
         const message = document.getElementById("message").value;
@@ -60,13 +81,13 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message }),
         })
-          .then((response) => response.json())
+          .then((res) => res.json())
           .then((data) => {
-            loadBlogs();
+            renderBlogs(data.blogs);
+            document.getElementById("post-form").reset();
           });
       });
 
-      // Blog-Eintrag löschen
       document.getElementById("delete-form").addEventListener("submit", function (event) {
         event.preventDefault();
         const id = document.getElementById("delete-id").value;
@@ -74,13 +95,13 @@
         fetch(`${apiUrl}/${id}`, {
           method: "DELETE",
         })
-          .then((response) => response.json())
+          .then((res) => res.json())
           .then((data) => {
-            loadBlogs();
+            renderBlogs(data.blogs);
+            document.getElementById("delete-form").reset();
           });
       });
 
-      // Blog-Eintrag aktualisieren
       document.getElementById("update-form").addEventListener("submit", function (event) {
         event.preventDefault();
         const id = document.getElementById("update-id").value;
@@ -91,13 +112,13 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message }),
         })
-          .then((response) => response.json())
+          .then((res) => res.json())
           .then((data) => {
-            loadBlogs();
+            renderBlogs(data.blogs);
+            document.getElementById("update-form").reset();
           });
       });
 
-      // Initiale Blog-Einträge laden
       loadBlogs();
     </script>
   </body>
