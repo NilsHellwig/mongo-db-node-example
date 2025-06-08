@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog</title>
+  </head>
+  <body>
+    <h1>Blog-Einträge</h1>
+
+    <h2>POST-Request: Neuen Blog-Eintrag posten</h2>
+    <form id="post-form">
+      <textarea id="message" placeholder="Nachricht" required></textarea><br /><br />
+      <button type="submit">Posten</button>
+    </form>
+
+    <h2>GET-Request: Blog-Einträge anzeigen</h2>
+    <div id="blog-list"></div>
+
+    <h2>DELETE-Request: Blog-Eintrag löschen</h2>
+    <form id="delete-form">
+      <input type="text" id="delete-id" placeholder="ID des zu löschenden Eintrags" required /><br /><br />
+      <button type="submit">Löschen</button>
+    </form>
+
+    <h2>UPDATE-Request: Blog-Eintrag aktualisieren</h2>
+    <form id="update-form">
+      <input type="text" id="update-id" placeholder="ID" required /><br /><br />
+      <textarea id="update-message" placeholder="Neue Nachricht" required></textarea><br /><br />
+      <button type="submit">Aktualisieren</button>
+    </form>
+
+    <script>
+      const apiUrl = "http://localhost:3000/blogs";
+
+      // Funktion zum Laden und Anzeigen der Blogeinträge
+      // Funktion zum Laden und Anzeigen der Blogeinträge
+      function loadBlogs() {
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((blogs) => {
+            const blogList = document.getElementById("blog-list");
+            blogList.innerHTML = "";
+            blogs.forEach((blog) => {
+              const blogElement = document.createElement("div");
+              blogElement.className = "blog-entry";
+              blogElement.innerHTML = `<strong>ID:</strong> ${blog._id} <br> <strong>Message:</strong> ${blog.message}`;
+              blogList.appendChild(blogElement);
+            });
+          });
+      }
+
+      // Blog-Eintrag posten
+      document.getElementById("post-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const message = document.getElementById("message").value;
+
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            loadBlogs();
+          });
+      });
+
+      // Blog-Eintrag löschen
+      document.getElementById("delete-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const id = document.getElementById("delete-id").value;
+
+        fetch(`${apiUrl}/${id}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            loadBlogs();
+          });
+      });
+
+      // Blog-Eintrag aktualisieren
+      document.getElementById("update-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const id = document.getElementById("update-id").value;
+        const message = document.getElementById("update-message").value;
+
+        fetch(`${apiUrl}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            loadBlogs();
+          });
+      });
+
+      // Initiale Blog-Einträge laden
+      loadBlogs();
+    </script>
+  </body>
+</html>
