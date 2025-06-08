@@ -21,3 +21,5 @@ npm install & npm start
 ```bash
 http-server
 ```
+
+Die Lösung befindet sich im Branch `solution`
